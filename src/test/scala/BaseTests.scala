@@ -32,6 +32,10 @@ class BaseTests extends FunSuite with Matchers {
 
   val bundles = List(twoApples, freeStickOfButter)
 
+  test("no pricing, no costs") {
+    PricingAPI(List.empty, List.empty).price(products) shouldEqual 0
+  }
+
   test("no bundles") {
     PricingAPI(pricing, List.empty).price(products) shouldEqual 8.48
   }

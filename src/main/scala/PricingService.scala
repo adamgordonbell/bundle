@@ -28,11 +28,14 @@ case class PricingService(basePrices: Map[SKU, BigDecimal], discounts: List[Disc
       stepNResult.sortWith(_ < _).head
     }
     def apply: BigDecimal = {
-      def basePriceSum(p: Bag[SKU]): BigDecimal = p.map(basePrices(_)).sum
+      def basePriceSum(products: Bag[SKU]): BigDecimal = {
+        def default() : BigDecimal = 0
+        products.map(basePrices.getOrElse(_,default)).sum
+      }
       def getAllDiscountsThatApply(products: Bag[SKU]): List[Discount] = {
         discounts.filter(bundle => bundle.items.intersect(products) == bundle.items)
       }
-      val total = getAllDiscountsThatApply(remainingItems) match {
+      getAllDiscountsThatApply(remainingItems) match {
         case Nil => basePriceSum(remainingItems)
         case list => getCombinationWithLowestPrice(list)
       }

@@ -43,7 +43,9 @@ class HarderTests extends FunSuite with Matchers {
   )))
 
   test("combinatorial discount - Cache Test"){
-    PricingAPI(pricing, List(greedyDiscount, non_greedy_A, non_greedy_B) ++ junkDiscounts).price(List(a1, b2, c3, d4)) shouldEqual 25
-    PricingAPI(pricing, List(greedyDiscount, non_greedy_A, non_greedy_B) ++ junkDiscounts).price(List(a1, b2, c3, d4)) shouldEqual 25
+    //We have lots of discounts, but caching should save us from re-evaluating sub problems
+    val pricingAPI =  PricingAPI(pricing, List(greedyDiscount, non_greedy_A, non_greedy_B) ++ junkDiscounts)
+    pricingAPI.price(List(a1, b2, c3, d4)) shouldEqual 25
+    pricingAPI.price(List(a1, b2, c3, d4)) shouldEqual 25
   }
 }
