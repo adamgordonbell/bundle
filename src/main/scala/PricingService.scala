@@ -9,20 +9,21 @@ import util.Extend._
   case class PricingService(basePrices: Map[SKU, BigDecimal], discounts : List[Discount]){
 
     def price(products : Bag[SKU]) : BigDecimal = {
-      val basePrice = basePriceSum(products)
-      val price = applyDiscount(PartialPrice(products))
-      price.fullPrice(basePrices)
+      applyDiscount(products)
     }
 
-    def applyDiscount(price : PartialPrice) : PartialPrice = {
-      print("applyDiscount")
-      def applyAll(list: List[Discount]): List[PartialPrice] = {
-        val l = list.map(x => applyDiscount(price.applyDiscount(x))).sortBy(_.fullPrice(basePrices))
-        l
+
+    def applyDiscount(remainingItems : Bag[SKU]) : BigDecimal = {
+      println("applyDiscount")
+      println(remainingItems)
+      def applyAllDiscounts(list: List[Discount]): BigDecimal = {
+        val l = list.map(x => (subtractDiscount(remainingItems,x),x))
+        val x = l.map(x => x._2.discountPrice + applyDiscount(x._1))
+        x.sortWith(_ < _).head
       }
-      getAllDiscountsThatApply(price.items) match {
-        case Nil => price
-        case list => val l = applyAll(list).head
+      getAllDiscountsThatApply(remainingItems) match {
+        case Nil => basePriceSum(remainingItems)
+        case list => val l = applyAllDiscounts(list)
           l
       }
     }
@@ -33,4 +34,9 @@ import util.Extend._
     }
 
     def basePriceSum(p : Bag[SKU]): BigDecimal = p.map(basePrices(_)).sum
+
+   def subtractDiscount(items: Bag[SKU], discount : Discount): Bag[SKU] = {
+     items.diff(discount.items)
+  }
+
   }

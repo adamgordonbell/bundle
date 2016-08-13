@@ -75,4 +75,71 @@ class Tests extends FunSuite with Matchers {
 
     PricingAPI(pricing, List(greedyDiscount,nongreedyA,nongreedyB)).price(List(a, b, c, d)) shouldEqual 25
   }
+
+
+  test("combintorial algo fail") {
+    val (a,b,c,d) =  (
+      Product(1,"A"),
+      Product(2,"B"),
+      Product(3,"C"),
+      Product(4,"D")
+      )
+    val products: List[Product] = List(
+      a,
+      b,
+      c,
+      d
+    )
+    val pricing = products.map(Price(_,10))
+
+    val greedyDiscount = Bundle(List(
+      Price(a,10),
+      Price(b,10),
+      Price(c,10),
+      Price(d,0)
+    ))
+
+    val nongreedyA = Bundle(List(
+      Price(a,13),
+      Price(b,0)
+    ))
+
+    val nongreedyB = Bundle(List(
+      Price(c,12),
+      Price(d,0)
+    ))
+
+    val bad1 = Bundle(List(
+      Price(a,15),
+      Price(b,0)
+    ))
+
+
+    val bad1a = Bundle(List(
+      Price(a,16),
+      Price(b,0)
+    ))
+
+    val bad2 = Bundle(List(
+      Price(a,17),
+      Price(b,0)
+    ))
+
+    val bad3 = Bundle(List(
+      Price(a,18),
+      Price(b,0)
+    ))
+
+    val bad4 = Bundle(List(
+      Price(a,19),
+      Price(b,0)
+    ))
+
+    val bad5 = Bundle(List(
+      Price(c,122),
+      Price(d,0)
+    ))
+
+    PricingAPI(pricing, List(greedyDiscount,nongreedyA,nongreedyB, bad1, bad1a, bad2,bad3,bad4,bad5)).price(List(a, b, c, d)) shouldEqual 25
+  }
 }
