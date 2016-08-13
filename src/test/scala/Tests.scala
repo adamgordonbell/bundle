@@ -44,9 +44,9 @@ class Tests extends FunSuite with Matchers {
   test("greedy algo fail") {
     val (a,b,c,d) =  (
       Product(1,"A"),
-      Product(1,"B"),
-      Product(1,"C"),
-      Product(1,"D")
+      Product(2,"B"),
+      Product(3,"C"),
+      Product(4,"D")
       )
     val products: List[Product] = List(
       a,

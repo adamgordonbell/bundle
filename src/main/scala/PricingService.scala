@@ -15,9 +15,15 @@ import util.Extend._
     }
 
     def applyDiscount(price : PartialPrice) : PartialPrice = {
+      print("applyDiscount")
+      def applyAll(list: List[Discount]): List[PartialPrice] = {
+        val l = list.map(x => applyDiscount(price.applyDiscount(x))).sortBy(_.fullPrice(basePrices))
+        l
+      }
       getAllDiscountsThatApply(price.items) match {
-        case list =>   list.map(x =>  applyDiscount(price.applyDiscount(x))).sortBy(_.fullPrice(basePrices)).head
         case Nil => price
+        case list => val l = applyAll(list).head
+          l
       }
     }
 
