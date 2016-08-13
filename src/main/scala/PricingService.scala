@@ -1,42 +1,46 @@
 import data._
-import scala.collection.immutable.Bag
 import util.Extend._
+
+import scala.collection.concurrent.TrieMap
+import scala.collection.immutable.Bag
+
 /**
   *
   * Created by adam on 8/13/16.
   */
 
-  case class PricingService(basePrices: Map[SKU, BigDecimal], discounts : List[Discount]){
+case class PricingService(basePrices: Map[SKU, BigDecimal], discounts: List[Discount]) {
 
-    def price(products : Bag[SKU]) : BigDecimal = {
-      applyDiscount(products)
+  //Cache sub-problems using concurrent threadsafe cache
+  val cache = new TrieMap[String, BigDecimal]
+
+  def price(products: Bag[SKU]): BigDecimal = {
+    applyDiscount(products)
+  }
+
+  def applyDiscount(remainingItems: Bag[SKU]): BigDecimal = {
+    def getCombinationWithLowestPrice(list: List[Discount]): BigDecimal = {
+      def subtractDiscount(items: Bag[SKU], discount: Discount): Bag[SKU] = {
+        items.diff(discount.items)
+      }
+      val stepOne = list.map(x => (subtractDiscount(remainingItems, x), x))
+      val stepN = stepOne.map(x => x._2.discountPrice + applyDiscount(x._1))
+      stepN.sortWith(_ < _).head
     }
-
-
-    def applyDiscount(remainingItems : Bag[SKU]) : BigDecimal = {
-      println("applyDiscount")
-      println(remainingItems)
-      def applyAllDiscounts(list: List[Discount]): BigDecimal = {
-        val l = list.map(x => (subtractDiscount(remainingItems,x),x))
-        val x = l.map(x => x._2.discountPrice + applyDiscount(x._1))
-        x.sortWith(_ < _).head
+    def apply: BigDecimal = {
+      def basePriceSum(p: Bag[SKU]): BigDecimal = p.map(basePrices(_)).sum
+      def getAllDiscountsThatApply(products: Bag[SKU]): List[Discount] = {
+        discounts.filter(bundle => bundle.items.intersect(products) == bundle.items)
       }
       getAllDiscountsThatApply(remainingItems) match {
         case Nil => basePriceSum(remainingItems)
-        case list => val l = applyAllDiscounts(list)
-          l
+        case list => getCombinationWithLowestPrice(list)
       }
     }
-
-    def getAllDiscountsThatApply(products : Bag[SKU]) : List[Discount] = {
-      val d = discounts.filter(bundle => bundle.items.intersect(products) == bundle.items)
-      d //ToDo remove me
-    }
-
-    def basePriceSum(p : Bag[SKU]): BigDecimal = p.map(basePrices(_)).sum
-
-   def subtractDiscount(items: Bag[SKU], discount : Discount): Bag[SKU] = {
-     items.diff(discount.items)
+    cache.getOrElseUpdate(remainingItems.toString, apply)
   }
 
-  }
+
+
+
+}
