@@ -38,4 +38,40 @@ class Tests extends FunSuite with Matchers {
   test("two apples") {
     BundlePricing(pricing, bundles).price(List(apple, apple)) shouldEqual 2.15
   }
+
+
+  test("greedy algo fail") {
+    val (a,b,c,d) =  (
+      Product(1,"A"),
+      Product(1,"B"),
+      Product(1,"C"),
+      Product(1,"D")
+      )
+    val products: List[Product] = List(
+      a,
+      b,
+      c,
+      d
+    )
+    val pricing = products.map(Price(_,10))
+
+    val greedyDiscount = Bundle(List(
+      Price(a,10),
+      Price(b,10),
+      Price(c,10),
+      Price(d,0)
+    ))
+
+    val nongreedyA = Bundle(List(
+      Price(a,13),
+      Price(b,0)
+    ))
+
+    val nongreedyB = Bundle(List(
+      Price(c,12),
+      Price(d,0)
+    ))
+
+    BundlePricing(pricing, List(greedyDiscount,nongreedyA,nongreedyB)).price(List(a, b, c, d)) shouldEqual 25
+  }
 }
