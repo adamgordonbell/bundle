@@ -1,4 +1,5 @@
-import org.scalatest.{Matchers, FunSuite}
+import data.{Bundle, Price, Product}
+import org.scalatest.{FunSuite, Matchers}
 
 class Tests extends FunSuite with Matchers {
   val apple = Product(1,"Apple")
@@ -32,11 +33,11 @@ class Tests extends FunSuite with Matchers {
   val bundles = List(twoApples,freeStickOfButter)
 
   test("no bundles") {
-    BundlePricing(pricing, List.empty).price(products) shouldEqual 8.48
+    PricingAPI(pricing, List.empty).price(products) shouldEqual 8.48
   }
 
   test("two apples") {
-    BundlePricing(pricing, bundles).price(List(apple, apple)) shouldEqual 2.15
+    PricingAPI(pricing, bundles).price(List(apple, apple)) shouldEqual 2.15
   }
 
 
@@ -72,6 +73,6 @@ class Tests extends FunSuite with Matchers {
       Price(d,0)
     ))
 
-    BundlePricing(pricing, List(greedyDiscount,nongreedyA,nongreedyB)).price(List(a, b, c, d)) shouldEqual 25
+    PricingAPI(pricing, List(greedyDiscount,nongreedyA,nongreedyB)).price(List(a, b, c, d)) shouldEqual 25
   }
 }
