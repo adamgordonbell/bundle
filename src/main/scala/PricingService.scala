@@ -10,19 +10,15 @@ import util.Extend._
 
     def price(products : Bag[SKU]) : BigDecimal = {
       val basePrice = basePriceSum(products)
-      val (items, price) = discount(products)
-      basePriceSum(items) + price
+      val price = applyDiscount(PartialPrice(products))
+      price.fullPrice(basePrices)
     }
 
-    def discount(products : Bag[SKU], price : BigDecimal = 0) : (Bag[SKU], BigDecimal) = {
-      biggestDiscount(products) match {
-        case Some(d) => discount(products.diff(d.items), price + d.discountPrice)
-        case None =>  (products,price)
+    def applyDiscount(price : PartialPrice) : PartialPrice = {
+      getAllDiscountsThatApply(price.items) match {
+        case list =>   list.map(x =>  applyDiscount(price.applyDiscount(x))).sortBy(_.fullPrice(basePrices)).head
+        case Nil => price
       }
-    }
-    def biggestDiscount(products : Bag[SKU]) : Option[Discount] = {
-      val d = getAllDiscountsThatApply(products).sortBy(_.savings).headOption
-      d //ToDo remove me
     }
 
     def getAllDiscountsThatApply(products : Bag[SKU]) : List[Discount] = {
