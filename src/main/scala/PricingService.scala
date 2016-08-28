@@ -29,7 +29,11 @@ case class PricingService(basePrices: Map[SKU, BigDecimal], discounts: List[Disc
   }
 
   private def getAllDiscountsThatApply(products: Bag[SKU]): List[Discount] = {
-    discounts.filter(bundle => bundle.items.intersect(products) == bundle.items)
+    def IsSubsetOfProducts(discount : Discount) : Boolean = {
+      //println(products.count(_ => true) + discount.items.count(_ => true))
+      discount.items.intersect(products) == discount.items
+    }
+    discounts.filter(IsSubsetOfProducts(_))
   }
 
   private def basePriceSum(products: Bag[SKU]): BigDecimal = {
